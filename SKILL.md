@@ -20,7 +20,9 @@ These three decisions are already confirmed by the user — apply them as defaul
 ## Workflow
 
 ### 1. Compose the task message
-Take the user's intent and turn it into one clear, self-contained instruction for opencode — opencode does not see your conversation, so the message must stand on its own. If the user gave important context (file names, constraints, a definition of "done"), fold it into the message. Don't add assumptions that weren't requested.
+Take the user's intent and turn it into one clear, self-contained instruction for opencode — opencode does not see your conversation, so the message must stand on its own. If the user gave important context (file names, error messages, constraints, a definition of "done"), fold it into the message. Don't add assumptions that weren't requested.
+
+**Don't pre-solve.** The message should describe the problem or goal — not your analysis or solution. Include context but NOT your diagnosis, root cause, or proposed fix. opencode is a full AI agent; let it reason and solve. If you find yourself writing "the cause is X, fix it by doing Y", stop — that's you solving it, not delegating it.
 
 ### 2. Determine the directory
 Pick the working directory based on task context. Default to `/Users/ilham/atlas` when unclear. Pass it via `--dir <path>`.
@@ -89,6 +91,20 @@ Action:
 opencode run --dangerously-skip-permissions --dir /Users/ilham/atlas "Add an email format validation function in the utils module. Handle common cases (empty, missing @, invalid domain). Follow the existing code conventions in that utils file."
 ```
 Then check the created/changed file and report.
+
+**Example 4 — bug delegation (right vs wrong)**
+
+❌ Wrong — Claude pre-solved it:
+```bash
+opencode run ... "The auth middleware fails because JWT expiry isn't being checked. Fix it by adding an expiry check in middleware.ts around line 42, comparing token.exp against the current timestamp."
+```
+
+✅ Right — opencode solves it:
+```bash
+opencode run ... "The auth middleware isn't rejecting expired JWT tokens. Fix it."
+```
+
+The difference: in the wrong version Claude already diagnosed the cause and prescribed the solution. In the right version the problem is stated and opencode does the investigation and fix.
 
 **Example 2 — continue**
 User: "keep going, add unit tests for it"
